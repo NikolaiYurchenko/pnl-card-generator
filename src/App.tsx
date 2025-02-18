@@ -26,7 +26,7 @@ function App() {
 
   const formatToString = (val: number) => {
     return {
-      value: `${ val < 0 ? '' : '+' }${Number(val).toLocaleString()}`,
+      value: `${ val < 0 ? '' : '+' }${Number(val).toLocaleString("en-US")}`,
       isNegative: val < 0,
     }
   }
