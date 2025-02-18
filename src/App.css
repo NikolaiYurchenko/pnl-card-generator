@@ -1,6 +1,6 @@
 @font-face {
     font-family: "Akira";
-    src: url("src/assets/fonts/Akira/Akira.otf") format("opentype");
+    src: url("@assets/fonts/Akira/Akira.otf") format("opentype");
     font-style: normal;
     font-display: swap;
 }
@@ -30,10 +30,10 @@
     letter-spacing: 0.5rem;
 }
 #capture.positive {
-    background-image: url("src/assets/images/template-positive.png");
+    background-image: url("@assets/images/template-positive.png");
 }
 #capture.negative {
-    background-image: url("src/assets/images/template-negative.png");
+    background-image: url("@assets/images/template-negative.png");
 }
 
 #capture > div.captureContainer {
