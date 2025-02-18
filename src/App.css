@@ -10,6 +10,7 @@
     margin: 0 auto;
     padding: 2rem;
     text-align: center;
+    background-color: #f9f9f9;
 }
 
 #root .container {
@@ -83,6 +84,7 @@
 
 #capture > div.captureContainer > p.pnlUsd {
     position: absolute;
+    color: white;
     top: 407px;
     right: 260px;
     font-weight: 400;
@@ -94,6 +96,7 @@
 
 #capture > div.captureContainer > p.return {
     position: absolute;
+    color: white;
     top: 709px;
     right: 81px;
     font-weight: 400;
@@ -105,6 +108,7 @@
 
 #capture > div.captureContainer > p.investedSol {
     position: absolute;
+    color: white;
     bottom: 74px;
     right: 150px;
     font-weight: 800;
@@ -129,11 +133,12 @@
 .editor .editor-label {
     display: block;
     font-weight: bold;
+    color: black;
 }
 
 .editor .editor-input {
     width: 100%;
     padding: 5px;
     border-radius: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid black;
 }
