@@ -69,7 +69,7 @@ function App() {
             </div>
             <p className="pnlSol">{formatToString(data.pnlSol).value}</p>
             <p className="pnlUsd">{formatToString(data.pnlUsd).value}</p>
-            <p className="return">{formatToString(data.return).value}$</p>
+            <p className="return">{`${formatToString(data.return).value}%`}</p>
             <p className="investedSol">{data.investedSol}</p>
           </div>
         </div>

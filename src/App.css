@@ -60,6 +60,7 @@
 }
 #capture > div.captureContainer > div.tokenNameContainer > p.tokenName {
     font-weight: 400;
+    color: white;
     width: 100%;
     font-size: 40px;
     margin-block-start: 0;
