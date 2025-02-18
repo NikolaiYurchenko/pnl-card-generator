@@ -8,6 +8,7 @@ type PNL = {
   pnlUsd: number;
   return: number;
   investedSol: number;
+  [key: string]: string | number;
 }
 
 const TEST_DATA: PNL = {
@@ -50,7 +51,7 @@ function App() {
     const { name, value } = e.target;
     setData({
       ...data,
-      [name]: isNaN(value) ? value : parseFloat(value),
+      [name as keyof PNL]: isNaN(Number(value)) ? value : parseFloat(value),
     });
   };
 
