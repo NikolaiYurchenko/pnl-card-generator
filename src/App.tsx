@@ -18,6 +18,7 @@ const TEST_DATA: PNL = {
   return: -14072,
   investedSol: 14.85
 }
+const THOUSAND = 1000;
 
 function App() {
   const [data, setData] = useState<PNL>(TEST_DATA);
@@ -25,8 +26,14 @@ function App() {
   const [isVisible, setIsVisible] = useState(true);
 
   const formatToString = (val: number) => {
+    let value = val;
+
+    if (val >= THOUSAND || val <= -THOUSAND) {
+      value = Math.trunc(val);
+    }
+
     return {
-      value: `${ val < 0 ? '' : '+' }${Number(val).toLocaleString("en-US")}`,
+      value: `${ val < 0 ? '' : '+' }${Number(value).toLocaleString("en-US")}`,
       isNegative: val < 0,
     }
   }
@@ -47,13 +54,37 @@ function App() {
     }
   }
 
-  const handleChange = (e: { target: { name: any; value: any; }; }) => {
+  const handleChange = (e: { target: { name: string; value: string; }; }) => {
     const { name, value } = e.target;
     setData({
       ...data,
       [name as keyof PNL]: isNaN(Number(value)) ? value : parseFloat(value),
     });
   };
+
+  const getNameFontSize = () => {
+    const config = {
+      maxSize: 120,
+      minSize: 10,
+      letterSpacing: .5,
+    };
+
+    const containerWidth = 567;
+    const nameLength = data.name.length;
+
+    if (nameLength < 5) {
+      return `${config.maxSize}px`;
+    }
+
+    const spacingInPixels = config.letterSpacing * 16 * (nameLength - 2);
+
+    const fontSize = Math.max(
+      config.minSize,
+      Math.min(config.maxSize, (containerWidth - spacingInPixels) / (nameLength * 1.2))
+    );
+
+    return `${fontSize}px`;
+  }
 
   return (
     <>
@@ -65,7 +96,10 @@ function App() {
         >
           <div className="captureContainer">
             <div className="tokenNameContainer">
-              <p className="tokenName">{data.name.toUpperCase()}</p>
+              <p
+                className="tokenName"
+                style={{fontSize: getNameFontSize(),}}
+              >{data.name.toUpperCase()}</p>
             </div>
             <p className="pnlSol">{formatToString(data.pnlSol).value}</p>
             <p className="pnlUsd">{formatToString(data.pnlUsd).value}</p>

@@ -46,7 +46,7 @@
 #capture > div.captureContainer > div.tokenNameContainer {
     position: absolute;
     top: 468px;
-    left: 117px;
+    left: 125px;
     width: 567px;
     height: 100px;
     display: flex;
@@ -65,7 +65,7 @@
     font-size: 40px;
     margin-block-start: 0;
     margin-block-end: 0;
-    letter-spacing: 0.5rem;
+    letter-spacing: 8px;
 }
 
 #capture > div.captureContainer > p.pnlSol {
@@ -78,9 +78,11 @@
     margin-block-start: 0;
     margin-block-end: 0;
     color: rgba(15, 255, 75, 1);
+    text-shadow: 7px 12px 35px rgba(15, 255, 75, .5);
 }
 #capture.negative > div.captureContainer > p.pnlSol {
     color: rgba(251, 40, 40, 1);
+    text-shadow: 7px 12px 35px rgba(251, 40, 40, .5);
 }
 
 #capture > div.captureContainer > p.pnlUsd {
