@@ -8,6 +8,7 @@ In the root directory of your project, run:
 
 ```bash
 npm install
+npx playwright install 
 npm run dev
 ```
 This will start the front-end React app on http://localhost:5173 (or another port if specified).

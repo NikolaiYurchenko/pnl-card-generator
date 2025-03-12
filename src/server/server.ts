@@ -1,5 +1,5 @@
 import express from "express";
-import puppeteer from "puppeteer";
+import { chromium } from "playwright";
 import cors from "cors";
 import path from "path";
 import * as fs from "node:fs";
@@ -58,10 +58,8 @@ app.post("/generate-image", async (req, res) => {
     const { name, pnlSol, pnlUsd, return: returnValue, investedSol } = req.body;
 
     // Launch Puppeteer with headless mode as false to debug
-    const browser = await puppeteer.launch({ headless: true, args: ['--allow-file-access-from-files', '--enable-local-file-accesses'] });
+    const browser = await chromium.launch({ headless: true, args: ['--allow-file-access-from-files', '--enable-local-file-accesses'] });
     const page = await browser.newPage();
-
-    await page.setViewport({ ...pageSize });
 
     // Load the font as Base64
     const fontPath = path.join(__dirname, "assets", "fonts", "Akira", "Akira.otf");
@@ -230,13 +228,13 @@ app.post("/generate-image", async (req, res) => {
       </html>
     `);
 
-    const screenshotPath = path.join(__dirname, 'screenshot.png');
-    await page.screenshot({ path: screenshotPath, fullPage: true, omitBackground: false });
+    const outPath = path.join(__dirname, `${name}.png`);
+    await page.screenshot({ path: outPath, fullPage: true, omitBackground: false });
 
     res.setHeader("Content-Type", "image/png");
-    res.sendFile(screenshotPath);
-  } catch (error) {
-    res.status(500).send("Failed to generate image");
+    res.sendFile(outPath);
+  } catch (error: any) {
+    res.status(500).send(`Failed to generate image: ${error.message}` );
   }
 });
 
