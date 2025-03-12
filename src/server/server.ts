@@ -58,7 +58,7 @@ app.post("/generate-image", async (req, res) => {
     const { name, pnlSol, pnlUsd, return: returnValue, investedSol } = req.body;
 
     // Launch Puppeteer with headless mode as false to debug
-    const browser = await puppeteer.launch({ headless: true, args: ['--allow-file-access-from-files', '--enable-local-file-accesses'] });
+    const browser = await puppeteer.launch({ headless: true, args: ['--allow-file-access-from-files', '--enable-local-file-accesses', '--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
 
     await page.setViewport({ ...pageSize });
@@ -235,8 +235,8 @@ app.post("/generate-image", async (req, res) => {
 
     res.setHeader("Content-Type", "image/png");
     res.sendFile(screenshotPath);
-  } catch (error) {
-    res.status(500).send("Failed to generate image");
+  } catch (error: any) {
+    res.status(500).send(`Failed to generate image: ${error.message}`);
   }
 });
 
