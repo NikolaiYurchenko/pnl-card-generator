@@ -1,78 +1,26 @@
 import { useState } from "react";
 import "./App.css";
+import {PnlCard1} from "./components/PnlCard1";
+import {PnlCard2} from "./components/PnlCard2";
 
-type PNL = {
-  name: string;
-  pnlSol: number;
-  pnlUsd: number;
-  return: number;
-  investedSol: number;
-  [key: string]: string | number;
-};
-
-const TEST_DATA: PNL = {
-  name: "melania1",
-  pnlSol: -2104.5,
-  pnlUsd: -413284.38,
-  return: -14072,
-  investedSol: 14.85,
-};
+const tabs: {[key: string]: { name: string, value: number }} = {
+  first: { name: "First Edition", value: 0 },
+  second: { name: "Second Edition", value: 1 },
+}
 
 function App() {
-  const [data, setData] = useState<PNL>(TEST_DATA);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const handleGenerateImage = async () => {
-    setLoading(true);
-    const response = await fetch("http://localhost:3000/generate-image", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-
-    if (response.ok) {
-      const blob = await response.blob();
-      const imgUrl = URL.createObjectURL(blob);
-      setImageUrl(imgUrl);
-    } else {
-      console.error("Failed to generate image");
-    }
-
-    setLoading(false);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setData({
-      ...data,
-      [name as keyof PNL]: isNaN(Number(value)) ? value : parseFloat(value),
-    });
-  };
+  const [currentTab, setCurrentTab] = useState<number>(tabs.first.value);
 
   return (
-      <div className="container">
-        {Object.keys(data).map((key) => (
-            <div key={key} className="editor">
-              <label className="editor-label">{key}:</label>
-              <input
-                  type={typeof data[key] === "number" ? "number" : "text"}
-                  name={key}
-                  value={data[key]}
-                  onChange={handleChange}
-                  placeholder={`Enter ${key}`}
-                  className="editor-input"
-              />
-            </div>
-        ))}
-
-        <button onClick={handleGenerateImage}>{loading ? 'Loading...' : 'Generate Image'}</button>
-
-        {imageUrl && !loading && (
-            <a id='download' href={imageUrl} download="pnl-image.png">
-              <button>Download</button>
-            </a>
-        )}
+      <div className="main">
+        <header className="main-header">
+          {Object.keys(tabs).map((key) => (
+              <div key={key} className={`navigationItem ${currentTab === tabs[key].value ? 'active' : ''}`} onClick={() => setCurrentTab(tabs[key].value)}>{tabs[key].name}</div>
+          ))}
+        </header>
+        {
+          currentTab === tabs.first.value ? <PnlCard1 /> : <PnlCard2 />
+        }
       </div>
   );
 }

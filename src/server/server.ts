@@ -193,37 +193,25 @@ app.post("/generate-image", async (req, res) => {
       </html>
     `);
 
-    const imagePath = path.join(__dirname, `${name}.png`);
+    const imagePath = path.join(__dirname, `pnl-${name}.png`);
     await page.screenshot({ path: imagePath, fullPage: true, omitBackground: false });
 
     res.setHeader("Content-Type", "image/png");
-    res.sendFile(imagePath);
+    res.sendFile(imagePath, () => {
+      fs.unlink(imagePath, (err) => {
+        if (err) console.error("Error deleting image:", err);
+      });
+    });
   } catch (error: any) {
     res.status(500).send(`Failed to generate image: ${error.message}`);
   }
 });
 
-const TEST_CHART_DATA = [
-  { timestamp_secs: 1742506740, open: 0.000000133, high: 0.00000054, low: 0.0000001, close: 0.00000047, volume: 125.44 },
-  { timestamp_secs: 1742506680, open: 0.000000409, high: 0.00000036, low: 0.000000162, close: 0.000000173, volume: 144.52 },
-  { timestamp_secs: 1742506620, open: 0.000000173, high: 0.000000183, low: 0.000000108, close: 0.000000185, volume: 52.71 },
-  { timestamp_secs: 1742506560, open: 0.000000185, high: 0.000000183, low: 0.000000108, close: 0.000000117, volume: 107.18 },
-  { timestamp_secs: 1742506500, open: 0.000000117, high: 0.000000176, low: 0.000000099, close: 0.000000121, volume: 104.96 },
-];
-
-const TEST_PNL_DATA = {
-  name: "melania1",
-  pnlSol: -2104.5,
-  pnlPercent: -504.69,
-  profitUsd: -14072,
-  investedUsd: 14000000.85,
-};
-
-app.get("/ohlc-chart", async (_, res) => {
+app.post("/pnl-card", async (req, res) => {
     try {
-      const { name, pnlSol, pnlPercent, profitUsd, investedUsd } = TEST_PNL_DATA;
+      const { name, pnlSol, pnlPercent, profitUsd, investedUsd, chartData } = req.body;
 
-      const canvasData = getCanvas(TEST_CHART_DATA, pnlSol > 0);
+      const canvasData = getCanvas(JSON.parse(chartData), pnlSol > 0);
 
       const pageSize = {
         width: 600,
@@ -231,7 +219,7 @@ app.get("/ohlc-chart", async (_, res) => {
       }
 
       // Launch Puppeteer with headless mode as false to debug
-      const browser = await puppeteer.launch({ headless: true, args: ['--allow-file-access-from-files', '--enable-local-file-accesses', '--no-sandbox', '--disable-setuid-sandbox'] });
+      const browser = await puppeteer.launch({ headless: false, args: ['--allow-file-access-from-files', '--enable-local-file-accesses', '--no-sandbox', '--disable-setuid-sandbox'] });
       const page = await browser.newPage();
 
       await page.setViewport({ ...pageSize });
@@ -275,8 +263,8 @@ app.get("/ohlc-chart", async (_, res) => {
           background: url("data:image/png;base64,${bgImageBase64}");
           position: absolute;
           bottom: 45px;
-          left: 188px;
-          width: 404px;
+          right: 104px;
+          width: 496px;
           height: 756px;
         }
         #capture.positive {
@@ -291,11 +279,12 @@ app.get("/ohlc-chart", async (_, res) => {
           font-size: 40px;
           color: white;
           margin: 0 32px;
+          text-align: center;
         }
         .pnlContainer {
           display: flex;
           align-items: center;
-          justify-content: flex-start; 
+          justify-content: center; 
           height: 120px;
           margin: 0 32px;
         }
@@ -322,9 +311,11 @@ app.get("/ohlc-chart", async (_, res) => {
           font-size: 48px;
           color: rgba(168, 179, 184, 1);
           margin: 0 32px 8px 32px;
+          text-align: center;
         }
         .percent span {
           position: relative;
+          margin-left: -32px;
         }
         .percent span::after {
           content: "%";
@@ -350,11 +341,13 @@ app.get("/ohlc-chart", async (_, res) => {
         }
         .chartContainer {
           position: relative;
-          display: flex;
-          align-items: center;
+          width: 100%;
           height: 235px;
         }
         .chartContainer .candles {
+          position: absolute;
+          top: ${canvasData.start - 1}px;
+          left: 0;
           width: 100%;
           height: 3px;
           background: repeating-linear-gradient(
@@ -364,6 +357,7 @@ app.get("/ohlc-chart", async (_, res) => {
             transparent 16.33px, 
             transparent 32.66px
           );
+          z-index: 1;
         }
         .chartContainer .chart {
           position: absolute;
@@ -371,11 +365,12 @@ app.get("/ohlc-chart", async (_, res) => {
           height: 100%;
           background: rgba(27, 30, 34, 1);
           width: ${canvasData.width}px;
+          z-index: 2;
         }
         .chartContainer .chart #chart {
           position: absolute;
           right: 0;
-          top: ${canvasData.top}px;
+          top: 0;
         }
         .footer {
           display: flex;
@@ -430,7 +425,11 @@ app.get("/ohlc-chart", async (_, res) => {
       await page.screenshot({ path: imagePath, fullPage: true, omitBackground: false });
 
       res.setHeader("Content-Type", "image/png");
-      res.sendFile(imagePath);
+      res.sendFile(imagePath, () => {
+        fs.unlink(imagePath, (err) => {
+          if (err) console.error("Error deleting image:", err);
+        });
+      });
     } catch (error: any) {
       res.status(500).send(`Failed to generate image: ${error.message}`);
     }

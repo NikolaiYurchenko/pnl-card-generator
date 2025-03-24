@@ -15,12 +15,12 @@ const colors = {
   negative: 'rgba(220, 87, 91, 1)',
 }
 
-export function getCanvas(data: CanvasData, isPositive?: boolean): { data: Canvas, top: number, width: number } {
+export function getCanvas(data: CanvasData, isPositive?: boolean): { data: Canvas, width: number, start: number } {
   if (!data.length) {
     return {
       data: createCanvas(0, 0),
-      top: 0,
-      width: 0
+      width: 0,
+      start: 117,
     }
   }
 
@@ -30,8 +30,8 @@ export function getCanvas(data: CanvasData, isPositive?: boolean): { data: Canva
   const start = first.open > first.close ? first.high : first.low;
   const maxPrice = Math.max(...data.map(d => d.high));
   const minPrice = Math.min(...data.map(d => d.low));
-  const center = 235 - ((start - minPrice) / (maxPrice - minPrice)) * 235;
-  const chartHeight = 235 - Math.abs(235/2 - center);
+  const startFormatted = ((maxPrice - start) / (maxPrice - minPrice)) * 235;
+  const chartHeight = 235;
   const width = chartWidth;
   const height = chartHeight;
 
@@ -78,7 +78,7 @@ export function getCanvas(data: CanvasData, isPositive?: boolean): { data: Canva
 
   return {
     data: canvas,
-    top: height + center - 235,
     width: chartWidth,
+    start: Math.floor(startFormatted),
   };
 }
