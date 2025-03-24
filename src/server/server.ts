@@ -3,51 +3,14 @@ import puppeteer from "puppeteer";
 import cors from "cors";
 import path from "path";
 import * as fs from "node:fs";
+import { getCanvas } from "./helpers/ohlcv";
+import { formatNumber, formatToString, getNameFontSize } from "./helpers/formatters";
 
 const app = express();
 const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
-
-const THOUSAND = 1000;
-
-const formatToString = (val: number) => {
-  let value = val;
-
-  if (val >= THOUSAND || val <= -THOUSAND) {
-    value = Math.trunc(val);
-  }
-
-  return {
-    value: `${ val < 0 ? '' : '+' }${Number(value).toLocaleString("en-US")}`,
-    isNegative: val < 0,
-  }
-}
-
-const getNameFontSize = (name: string) => {
-  const config = {
-    maxSize: 120,
-    minSize: 10,
-    letterSpacing: .5,
-  };
-
-  const containerWidth = 567;
-  const nameLength = name.length;
-
-  if (nameLength < 5) {
-    return `${config.maxSize}px`;
-  }
-
-  const spacingInPixels = config.letterSpacing * 16 * (nameLength - 2);
-
-  const fontSize = Math.max(
-      config.minSize,
-      Math.min(config.maxSize, (containerWidth - spacingInPixels) / (nameLength * 1.2))
-  );
-
-  return `${fontSize}px`;
-}
 
 app.post("/generate-image", async (req, res) => {
   try {
@@ -230,14 +193,247 @@ app.post("/generate-image", async (req, res) => {
       </html>
     `);
 
-    const screenshotPath = path.join(__dirname, 'screenshot.png');
-    await page.screenshot({ path: screenshotPath, fullPage: true, omitBackground: false });
+    const imagePath = path.join(__dirname, `${name}.png`);
+    await page.screenshot({ path: imagePath, fullPage: true, omitBackground: false });
 
     res.setHeader("Content-Type", "image/png");
-    res.sendFile(screenshotPath);
+    res.sendFile(imagePath);
   } catch (error: any) {
     res.status(500).send(`Failed to generate image: ${error.message}`);
   }
+});
+
+const TEST_CHART_DATA = [
+  { timestamp_secs: 1742506740, open: 0.000000133, high: 0.00000054, low: 0.0000001, close: 0.00000047, volume: 125.44 },
+  { timestamp_secs: 1742506680, open: 0.000000409, high: 0.00000036, low: 0.000000162, close: 0.000000173, volume: 144.52 },
+  { timestamp_secs: 1742506620, open: 0.000000173, high: 0.000000183, low: 0.000000108, close: 0.000000185, volume: 52.71 },
+  { timestamp_secs: 1742506560, open: 0.000000185, high: 0.000000183, low: 0.000000108, close: 0.000000117, volume: 107.18 },
+  { timestamp_secs: 1742506500, open: 0.000000117, high: 0.000000176, low: 0.000000099, close: 0.000000121, volume: 104.96 },
+];
+
+const TEST_PNL_DATA = {
+  name: "melania1",
+  pnlSol: -2104.5,
+  pnlPercent: -504.69,
+  profitUsd: -14072,
+  investedUsd: 14000000.85,
+};
+
+app.get("/ohlc-chart", async (_, res) => {
+    try {
+      const { name, pnlSol, pnlPercent, profitUsd, investedUsd } = TEST_PNL_DATA;
+
+      const canvasData = getCanvas(TEST_CHART_DATA, pnlSol > 0);
+
+      const pageSize = {
+        width: 600,
+        height: 800,
+      }
+
+      // Launch Puppeteer with headless mode as false to debug
+      const browser = await puppeteer.launch({ headless: true, args: ['--allow-file-access-from-files', '--enable-local-file-accesses', '--no-sandbox', '--disable-setuid-sandbox'] });
+      const page = await browser.newPage();
+
+      await page.setViewport({ ...pageSize });
+
+      const bgImagePath = path.join(__dirname, "assets", "images", "logo-bg-vector.png");
+      const bgImageBase64 = fs.readFileSync(bgImagePath).toString('base64');
+      const logoPath = path.join(__dirname, "assets", "images", "logo.png");
+      const logoBase64 = fs.readFileSync(logoPath).toString('base64');
+
+      // Load the font as Base64
+      const fontPath = path.join(__dirname, "assets", "fonts", "Manrope", "Manrope-Semibold.ttf");
+      const fontBase64 = fs.readFileSync(fontPath).toString('base64');
+      const inlineCSS = `
+        @font-face {
+          font-family: "Manrope";
+          src: url("data:font/ttf;base64,${fontBase64}") format("truetype");
+        }
+        body {
+          font-family: "Manrope", sans-serif;
+          background-color: #f9f9f9;
+          margin: 0 !important;
+        }
+        p {
+          margin-block-start: 0;
+          margin-block-end: 0;
+        }
+        #capture {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between; 
+          width: ${pageSize.width}px;
+          height: ${pageSize.height}px;
+          font-family: Manrope, sans-serif;
+          padding: 32px 8px;
+          box-sizing: border-box;
+          letter-spacing: 2;
+          position: relative;
+        }
+        #capture:before {
+          content: '';
+          background: url("data:image/png;base64,${bgImageBase64}");
+          position: absolute;
+          bottom: 45px;
+          left: 188px;
+          width: 404px;
+          height: 756px;
+        }
+        #capture.positive {
+          background: linear-gradient(180deg, rgba(180, 229, 89, 0.08) 2.32%, rgba(180, 229, 89, 0) 59.94%),
+                      linear-gradient(0deg, #1B1E22, #1B1E22);
+        }
+        #capture.negative {
+          background: linear-gradient(180deg, rgba(220, 87, 91, 0.12) 2.32%, rgba(220, 87, 91, 0) 59.94%),
+                      linear-gradient(0deg, #1B1E22, #1B1E22);
+        }
+        .tokenName {
+          font-size: 40px;
+          color: white;
+          margin: 0 32px;
+        }
+        .pnlContainer {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start; 
+          height: 120px;
+          margin: 0 32px;
+        }
+        .pnlContainer .symbol {
+          font-size: 56px;
+          color: rgba(180, 229, 89, 1);
+        }
+        .pnlContainer .symbol.negative {
+          color: rgba(220, 87, 91, 1);
+        }
+        .pnlContainer .pnlSol {
+          font-size: 88px;
+          color: white;
+        }
+        .pnlContainer .solana {
+          height: 88px;
+          font-size: 40px;
+          color: rgba(180, 229, 89, 1);
+        }
+        .pnlContainer .solana.negative {
+          color: rgba(220, 87, 91, 1);
+        }
+        .percent {
+          font-size: 48px;
+          color: rgba(168, 179, 184, 1);
+          margin: 0 32px 8px 32px;
+        }
+        .percent span {
+          position: relative;
+        }
+        .percent span::after {
+          content: "%";
+          font-size: 32px;
+          position: absolute;
+          top: 11px;
+          left: 100%;
+          line-height: 100%;
+        }
+        .dataContainer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin: 36px 32px 0 32px;
+        }
+        .dataContainer .label {
+          font-size: 26px;
+          color: rgba(168, 179, 184, 1);
+        }
+        .dataContainer .value {
+          font-size: 36px;
+          color: white;
+        }
+        .chartContainer {
+          position: relative;
+          display: flex;
+          align-items: center;
+          height: 235px;
+        }
+        .chartContainer .candles {
+          width: 100%;
+          height: 3px;
+          background: repeating-linear-gradient(
+            to right, 
+            rgba(54, 59, 67, 1), 
+            rgba(54, 59, 67, 1) 16.33px, 
+            transparent 16.33px, 
+            transparent 32.66px
+          );
+        }
+        .chartContainer .chart {
+          position: absolute;
+          right: 0;
+          height: 100%;
+          background: rgba(27, 30, 34, 1);
+          width: ${canvasData.width}px;
+        }
+        .chartContainer .chart #chart {
+          position: absolute;
+          right: 0;
+          top: ${canvasData.top}px;
+        }
+        .footer {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+        }
+      `;
+
+      const isPnlNegative = pnlSol < 0;
+
+      // Set the page content inline with CSS
+      await page.setContent(`
+        <html>
+          <head>
+            <style>${inlineCSS}</style>
+          </head>
+          <body>
+            <div id="capture" class="${formatToString(pnlSol).isNegative ? 'negative' : 'positive'}">
+              <div class="captureContainer">
+                <p class="tokenName">${name.toUpperCase()}</p>
+                <div class="pnlContainer">
+                    <span class="symbol ${isPnlNegative ? 'negative' : ''}">${isPnlNegative ? '-' : '+'}</span>
+                    <p class="pnlSol">${Number(Math.abs(pnlSol)).toLocaleString("en-US")}</p>
+                    <span class="solana ${isPnlNegative ? 'negative' : ''}">SOL</span>
+                </div>
+                <p class="percent"><span>${formatNumber(pnlPercent)}</span></p>
+                <div class="dataContainer">
+                    <p class="label">TOTAL INVESTED</p>
+                    <p class="value">${formatNumber(investedUsd, true)}</p>
+                </div>
+                <div class="dataContainer">
+                    <p class="label">TOTAL PROFIT</p>
+                    <p class="value">${formatNumber(profitUsd, true)}</p>
+                </div>
+                <div class="chartContainer">
+                    <div class="candles"></div>
+                    <div class="chart">
+                        <img id="chart" src="${canvasData.data.toDataURL('image/png')}" alt="chart image" />
+                    </div>
+                </div>
+              </div>
+              <div class="footer">
+                <img id="logoImage" src="data:image/png;base64,${logoBase64}" alt="logo image" />
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+
+      const imagePath = path.join(__dirname, `pnl-${name}.png`);
+      await page.screenshot({ path: imagePath, fullPage: true, omitBackground: false });
+
+      res.setHeader("Content-Type", "image/png");
+      res.sendFile(imagePath);
+    } catch (error: any) {
+      res.status(500).send(`Failed to generate image: ${error.message}`);
+    }
 });
 
 app.listen(PORT, () => {
