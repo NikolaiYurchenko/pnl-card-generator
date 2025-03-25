@@ -215,7 +215,7 @@ app.post("/pnl-card", async (req, res) => {
 
       const pageSize = {
         width: 600,
-        height: 800,
+        height: 800 - (chartData.length > 0 ? 0 : 235),
       }
 
       // Launch Puppeteer with headless mode as false to debug
@@ -262,29 +262,28 @@ app.post("/pnl-card", async (req, res) => {
           content: '';
           background: url("data:image/png;base64,${bgImageBase64}");
           position: absolute;
-          bottom: 45px;
-          right: 104px;
+          top: 0;
+          left: 0;
           width: 496px;
           height: 756px;
         }
         #capture.positive {
-          background: linear-gradient(180deg, rgba(180, 229, 89, 0.08) 2.32%, rgba(180, 229, 89, 0) 59.94%),
+          background: linear-gradient(180deg, rgba(180, 229, 89, 0.08) 54%, rgba(180, 229, 89, 0) 74%, rgba(180, 229, 89, 0.08) 95%),
                       linear-gradient(0deg, #1B1E22, #1B1E22);
         }
         #capture.negative {
-          background: linear-gradient(180deg, rgba(220, 87, 91, 0.12) 2.32%, rgba(220, 87, 91, 0) 59.94%),
+          background: linear-gradient(180deg, rgba(220, 87, 91, 0.12) 54%, rgba(220, 87, 91, 0) 74%, rgba(220, 87, 91, 0.12) 95%),
                       linear-gradient(0deg, #1B1E22, #1B1E22);
         }
         .tokenName {
           font-size: 40px;
           color: white;
           margin: 0 32px;
-          text-align: center;
         }
         .pnlContainer {
           display: flex;
           align-items: center;
-          justify-content: center; 
+          justify-content: flex-start; 
           height: 120px;
           margin: 0 32px;
         }
@@ -311,11 +310,9 @@ app.post("/pnl-card", async (req, res) => {
           font-size: 48px;
           color: rgba(168, 179, 184, 1);
           margin: 0 32px 8px 32px;
-          text-align: center;
         }
         .percent span {
           position: relative;
-          margin-left: -32px;
         }
         .percent span::after {
           content: "%";
@@ -348,7 +345,7 @@ app.post("/pnl-card", async (req, res) => {
           position: absolute;
           top: ${canvasData.start - 1}px;
           left: 0;
-          width: 100%;
+          width: calc(100% - ${canvasData.width}px);
           height: 3px;
           background: repeating-linear-gradient(
             to right, 
@@ -363,7 +360,7 @@ app.post("/pnl-card", async (req, res) => {
           position: absolute;
           right: 0;
           height: 100%;
-          background: rgba(27, 30, 34, 1);
+          overflow: hidden;
           width: ${canvasData.width}px;
           z-index: 2;
         }

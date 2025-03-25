@@ -47,7 +47,7 @@ export function getCanvas(data: CanvasData, isPositive?: boolean): { data: Canva
 
   const upColor = isPositive ? colors.positive : colors.neutral;
   const downColor = isPositive ? colors.neutral : colors.negative;
-  ctx.fillStyle = "rgba(27, 30, 34, 1)";
+  ctx.fillStyle = "transparent";
   ctx.fillRect(0, 0, width, height);
 
   // Draw OHLC bars
