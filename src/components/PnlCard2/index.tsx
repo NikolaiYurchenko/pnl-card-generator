@@ -65,7 +65,7 @@ export function PnlCard2() {
             <div key={key} className="editor">
               <label className="editor-label">{key}:</label>
               <input
-                  type={typeof data[key] === "number" ? "number" : "text"}
+                  type="text"
                   name={key}
                   value={data[key]}
                   onChange={handleChange}

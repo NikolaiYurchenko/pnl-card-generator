@@ -210,16 +210,17 @@ app.post("/generate-image", async (req, res) => {
 app.post("/pnl-card", async (req, res) => {
     try {
       const { name, pnlSol, pnlPercent, profitUsd, investedUsd, chartData } = req.body;
+      const formattedChartData = JSON.parse(chartData);
 
-      const canvasData = getCanvas(JSON.parse(chartData), pnlSol > 0);
+      const canvasData = getCanvas(formattedChartData, pnlSol > 0);
 
       const pageSize = {
         width: 600,
-        height: 800 - (chartData.length > 0 ? 0 : 235),
+        height: 800 - (formattedChartData.length > 0 ? 0 : 200),
       }
 
       // Launch Puppeteer with headless mode as false to debug
-      const browser = await puppeteer.launch({ headless: true, args: ['--allow-file-access-from-files', '--enable-local-file-accesses', '--no-sandbox', '--disable-setuid-sandbox'] });
+      const browser = await puppeteer.launch({ headless: false, args: ['--allow-file-access-from-files', '--enable-local-file-accesses', '--no-sandbox', '--disable-setuid-sandbox'] });
       const page = await browser.newPage();
 
       await page.setViewport({ ...pageSize });
@@ -337,6 +338,7 @@ app.post("/pnl-card", async (req, res) => {
           color: white;
         }
         .chartContainer {
+          display: ${formattedChartData.length > 0 ? 'block' : 'none'};
           position: relative;
           width: 100%;
           height: 235px;
