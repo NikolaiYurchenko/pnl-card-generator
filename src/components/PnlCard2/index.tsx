@@ -33,7 +33,7 @@ export function PnlCard2() {
 
   const handleGenerateImage = async () => {
     setLoading(true);
-    const response = await fetch("https://stale-deer-divide.loca.lt/pnl-card", {
+    const response = await fetch("https://42d5-84-151-16-115.ngrok-free.app/pnl-card", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
