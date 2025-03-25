@@ -220,7 +220,7 @@ app.post("/pnl-card", async (req, res) => {
       }
 
       // Launch Puppeteer with headless mode as false to debug
-      const browser = await puppeteer.launch({ headless: false, args: ['--allow-file-access-from-files', '--enable-local-file-accesses', '--no-sandbox', '--disable-setuid-sandbox'] });
+      const browser = await puppeteer.launch({ headless: true, args: ['--allow-file-access-from-files', '--enable-local-file-accesses', '--no-sandbox', '--disable-setuid-sandbox'] });
       const page = await browser.newPage();
 
       await page.setViewport({ ...pageSize });

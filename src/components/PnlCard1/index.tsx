@@ -24,7 +24,7 @@ export function PnlCard1() {
 
   const handleGenerateImage = async () => {
     setLoading(true);
-    const response = await fetch("https://42d5-84-151-16-115.ngrok-free.app/generate-image", {
+    const response = await fetch("https://5e40-84-151-16-115.ngrok-free.app/generate-image", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
