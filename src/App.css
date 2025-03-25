@@ -75,3 +75,13 @@
 #download > button {
     width: 100%;
 }
+
+.imagePreview1 {
+    width: 1000px;
+    height: 625px;
+}
+
+.imagePreview2 {
+    width: 300px;
+    height: 400px;
+}

@@ -73,7 +73,7 @@ export function PnlCard1() {
               <a id='download' href={imageUrl} download="pnl-image.png">
                 <button>Download</button>
               </a>
-              <img src={imageUrl} alt={imageUrl} />
+              <img className="imagePreview1" src={imageUrl} alt={imageUrl} />
             </>
         )}
       </div>
