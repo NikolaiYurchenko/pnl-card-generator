@@ -13,10 +13,9 @@ npm run dev
 This will start the front-end React app on http://localhost:5173 (or another port if specified).
 
 Start the back-end server:
-In a new terminal window, navigate to the src/server directory and run:
+In a new terminal window run:
 
 ```bash
-cd src/server
-ts-node server.ts
+ts-node src/server/server.ts
 ```
 This will start the back-end Express server on http://localhost:3000.
