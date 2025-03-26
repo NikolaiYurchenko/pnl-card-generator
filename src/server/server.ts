@@ -209,10 +209,14 @@ app.post("/generate-image", async (req, res) => {
 
 app.post("/pnl-card", async (req, res) => {
     try {
-      const { name, pnlSol, pnlPercent, profitUsd, investedUsd, chartData } = req.body;
+      const { name, pnlSol, pnlPercent, profitUsd, investedUsd, chartData, bgType } = req.body;
       const formattedChartData = JSON.parse(chartData);
 
-      const canvasData = getCanvas(formattedChartData, pnlSol > 0);
+      const canvasData = getCanvas({
+        data: formattedChartData,
+        isPositive:  pnlSol > 0,
+        isAnimeBackground: bgType !== 0,
+      });
 
       const pageSize = {
         width: 600,
@@ -220,12 +224,22 @@ app.post("/pnl-card", async (req, res) => {
       }
 
       // Launch Puppeteer with headless mode as false to debug
-      const browser = await puppeteer.launch({ headless: true, args: ['--allow-file-access-from-files', '--enable-local-file-accesses', '--no-sandbox', '--disable-setuid-sandbox'] });
+      const browser = await puppeteer.launch({ headless: false, args: ['--allow-file-access-from-files', '--enable-local-file-accesses', '--no-sandbox', '--disable-setuid-sandbox'] });
       const page = await browser.newPage();
 
       await page.setViewport({ ...pageSize });
 
-      const bgImagePath = path.join(__dirname, "assets", "images", "logo-bg-vector.png");
+      const backgroundPaths = {
+        default: path.join(__dirname, "assets", "images", "logo-bg-vector.png"),
+        anime: [
+          path.join(__dirname, "assets", "images", "bg-aot.png"),
+          path.join(__dirname, "assets", "images", "bg-jujutsu-kaisen.png"),
+          path.join(__dirname, "assets", "images", "bg-spy-family.png"),
+          path.join(__dirname, "assets", "images", "bg-spirited-away.png"),
+        ],
+      }
+
+      const bgImagePath = bgType === 0 ? backgroundPaths.default : backgroundPaths.anime[bgType - 1];
       const bgImageBase64 = fs.readFileSync(bgImagePath).toString('base64');
       const logoPath = path.join(__dirname, "assets", "images", "logo.png");
       const logoBase64 = fs.readFileSync(logoPath).toString('base64');
@@ -233,6 +247,7 @@ app.post("/pnl-card", async (req, res) => {
       // Load the font as Base64
       const fontPath = path.join(__dirname, "assets", "fonts", "Manrope", "Manrope-Semibold.ttf");
       const fontBase64 = fs.readFileSync(fontPath).toString('base64');
+
       const inlineCSS = `
         @font-face {
           font-family: "Manrope";
@@ -265,15 +280,20 @@ app.post("/pnl-card", async (req, res) => {
           position: absolute;
           top: 0;
           left: 0;
-          width: 496px;
-          height: 756px;
+          width: ${bgType === 0 ? 496 : 600}px;
+          height: ${bgType === 0 ? 756 : 800}px;
+          z-index: ${bgType === 0 ? 1 : -1};
+          filter: ${bgType !== 0 ? 'unset': `hue-rotate(${formatToString(pnlSol).isNegative ? 200 : 0}deg)`};
+        }
+        #capture.darken {
+          background: linear-gradient(180deg, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.81) 67%);
         }
         #capture.positive {
-          background: linear-gradient(180deg, rgba(180, 229, 89, 0.08) 54%, rgba(180, 229, 89, 0) 74%, rgba(180, 229, 89, 0.08) 95%),
+          background: linear-gradient(180deg, rgba(180, 229, 89, 0.08) 12%, rgba(180, 229, 89, 0) 59%, rgba(180, 229, 89, 0.08) 100%),
                       linear-gradient(0deg, #1B1E22, #1B1E22);
         }
         #capture.negative {
-          background: linear-gradient(180deg, rgba(220, 87, 91, 0.12) 54%, rgba(220, 87, 91, 0) 74%, rgba(220, 87, 91, 0.12) 95%),
+          background: linear-gradient(180deg, rgba(220, 87, 91, 0.12) 12%, rgba(220, 87, 91, 0) 59%, rgba(220, 87, 91, 0.12) 100%),
                       linear-gradient(0deg, #1B1E22, #1B1E22);
         }
         .tokenName {
@@ -388,7 +408,7 @@ app.post("/pnl-card", async (req, res) => {
             <style>${inlineCSS}</style>
           </head>
           <body>
-            <div id="capture" class="${formatToString(pnlSol).isNegative ? 'negative' : 'positive'}">
+            <div id="capture" class="${bgType !== 0 ? 'darken' : formatToString(pnlSol).isNegative ? 'negative' : 'positive'}">
               <div class="captureContainer">
                 <p class="tokenName">${name.toUpperCase()}</p>
                 <div class="pnlContainer">

@@ -13,9 +13,16 @@ const colors = {
   positive: 'rgba(180, 229, 89, 1)',
   neutral: 'rgba(54, 59, 67, 1)',
   negative: 'rgba(220, 87, 91, 1)',
+  white: 'rgba(255, 255, 255, 1)',
 }
 
-export function getCanvas(data: CanvasData, isPositive?: boolean): { data: Canvas, width: number, start: number } {
+type ChartProps = {
+  data: CanvasData,
+  isPositive?: boolean,
+  isAnimeBackground?: boolean,
+}
+
+export function getCanvas({data = [], isPositive = false, isAnimeBackground = false}: ChartProps): { data: Canvas, width: number, start: number } {
   if (!data.length) {
     return {
       data: createCanvas(0, 0),
@@ -45,8 +52,9 @@ export function getCanvas(data: CanvasData, isPositive?: boolean): { data: Canva
   // Define scaling functions
   const yScale = (price: number) => chartHeight - ((price - minPrice) / (maxPrice - minPrice)) * chartHeight;
 
-  const upColor = isPositive ? colors.positive : colors.neutral;
-  const downColor = isPositive ? colors.neutral : colors.negative;
+  const neutralColor = isAnimeBackground ? colors.white : colors.neutral;
+  const upColor = isPositive ? colors.positive : neutralColor;
+  const downColor = isPositive ? neutralColor : colors.negative;
   ctx.fillStyle = "transparent";
   ctx.fillRect(0, 0, width, height);
 

@@ -7,6 +7,7 @@ type PNL = {
   profitUsd: number;
   investedUsd: number;
   chartData: string;
+  bgType: number;
   [key: string]: string | number;
 };
 
@@ -23,8 +24,17 @@ const TEST_PNL_DATA = {
   pnlPercent: -504.69,
   profitUsd: -14072,
   investedUsd: 14000000.85,
+  bgType: 0,
   chartData: TEST_CHART_DATA
 };
+
+const backgrounds = [
+  { label: 'Default', value: 0 },
+  { label: 'Attack on Titans', value: 1 },
+  { label: 'Jujutsu Kaisen', value: 2 },
+  { label: 'Spy Family', value: 3 },
+  { label: 'Spirited Away', value: 4 },
+]
 
 export function PnlCard2() {
   const [data, setData] = useState<PNL>(TEST_PNL_DATA);
@@ -59,10 +69,16 @@ export function PnlCard2() {
     });
   };
 
+  const handleBgChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = Number(e.target.value);
+    const selectedBackground = backgrounds.find((bg) => bg.value === value);
+    if (selectedBackground) setData({ ...data, bgType: selectedBackground.value });
+  };
+
   return (
       <div className="container">
         {Object.keys(data).map((key) => (
-            <div key={key} className="editor">
+            key !== 'bgType' ? <div key={key} className="editor">
               <label className="editor-label">{key}:</label>
               <input
                   type="text"
@@ -72,8 +88,19 @@ export function PnlCard2() {
                   placeholder={`Enter ${key}`}
                   className="editor-input"
               />
-            </div>
+            </div> : null
         ))}
+
+        <div className="editor">
+          <label className="editor-label">Background type:</label>
+          <select id="background" value={data.bgType} onChange={handleBgChange}>
+            {backgrounds.map((bg) => (
+                <option key={bg.value} value={bg.value}>
+                  {bg.label}
+                </option>
+            ))}
+          </select>
+        </div>
 
         <button onClick={handleGenerateImage}>{loading ? 'Loading...' : 'Generate Image'}</button>
 
@@ -82,7 +109,7 @@ export function PnlCard2() {
               <a id='download' href={imageUrl} download="pnl-image.png">
                 <button>Download</button>
               </a>
-              <img className="imagePreview2" src={imageUrl} alt={imageUrl} />
+              <img className="imagePreview2" src={imageUrl} alt={imageUrl}/>
             </>
         )}
       </div>
