@@ -31,9 +31,9 @@ export function getCanvas({data = [], isPositive = false, isAnimeBackground = fa
     }
   }
 
-  const barWidth = 17;
-  const limitedData = data.length > 24 ? data.slice(-24) : data;
-  const chartWidth = Math.min(584, limitedData.length * (barWidth + 7) + (data.length > 24 ? 16 : 0));
+  const barWidth = 16;
+  const limitedData = data.length > 25 ? data.slice(-25) : data;
+  const chartWidth = Math.min(568, limitedData.length * (barWidth + 7) - 7);
   const first = limitedData[0];
   const start = first.open > first.close ? first.high : first.low;
   const maxPrice = Math.max(...limitedData.map(d => d.high));

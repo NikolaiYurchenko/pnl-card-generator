@@ -214,6 +214,7 @@ app.post("/generate-image", async (req, res) => {
       fs.unlink(imagePath, (err) => {
         if (err) console.error("Error deleting image:", err);
       });
+      page.close();
     });
   } catch (error: any) {
     res.status(500).send(`Failed to generate image: ${error.message}`);
@@ -379,8 +380,8 @@ app.post("/pnl-card", async (req, res) => {
         .chartContainer .candles {
           position: absolute;
           top: ${canvasData.start - 1}px;
-          left: 0;
-          width: calc(100% - ${canvasData.width}px);
+          left: calc((100% - 568px) / 2);
+          width: calc(568px - ${canvasData.width}px);
           height: 3px;
           background: repeating-linear-gradient(
             to right, 
@@ -393,7 +394,7 @@ app.post("/pnl-card", async (req, res) => {
         }
         .chartContainer .chart {
           position: absolute;
-          right: 0;
+          right: calc((100% - 568px) / 2);
           height: 100%;
           overflow: hidden;
           width: ${canvasData.width}px;
@@ -461,6 +462,7 @@ app.post("/pnl-card", async (req, res) => {
         fs.unlink(imagePath, (err) => {
           if (err) console.error("Error deleting image:", err);
         });
+        page.close();
       });
     } catch (error: any) {
       res.status(500).send(`Failed to generate image: ${error.message}`);
