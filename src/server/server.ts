@@ -1,5 +1,5 @@
 import express from "express";
-import puppeteer from "puppeteer";
+import puppeteer, {Browser} from "puppeteer";
 import cors from "cors";
 import path from "path";
 import * as fs from "node:fs";
@@ -12,6 +12,19 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
+let browser: Browser;
+
+// Start and reuse Puppeteer browser
+const launchBrowser = async () => {
+  if (!browser) {
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--allow-file-access-from-files', '--enable-local-file-accesses', '--no-sandbox', '--disable-setuid-sandbox'],
+    });
+  }
+  return browser;
+};
+
 app.post("/generate-image", async (req, res) => {
   try {
     const pageSize = {
@@ -21,7 +34,7 @@ app.post("/generate-image", async (req, res) => {
     const { name, pnlSol, pnlUsd, return: returnValue, investedSol } = req.body;
 
     // Launch Puppeteer with headless mode as false to debug
-    const browser = await puppeteer.launch({ headless: true, args: ['--allow-file-access-from-files', '--enable-local-file-accesses', '--no-sandbox', '--disable-setuid-sandbox'] });
+    const browser = await launchBrowser();
     const page = await browser.newPage();
 
     await page.setViewport({ ...pageSize });
@@ -224,7 +237,7 @@ app.post("/pnl-card", async (req, res) => {
       }
 
       // Launch Puppeteer with headless mode as false to debug
-      const browser = await puppeteer.launch({ headless: true, args: ['--allow-file-access-from-files', '--enable-local-file-accesses', '--no-sandbox', '--disable-setuid-sandbox'] });
+      const browser = await launchBrowser();
       const page = await browser.newPage();
 
       await page.setViewport({ ...pageSize });

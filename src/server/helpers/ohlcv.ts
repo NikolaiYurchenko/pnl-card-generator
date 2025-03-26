@@ -31,12 +31,13 @@ export function getCanvas({data = [], isPositive = false, isAnimeBackground = fa
     }
   }
 
-  const barWidth = 16;
-  const chartWidth = Math.min(584, data.length * barWidth);
-  const first = data[0];
+  const barWidth = 17;
+  const limitedData = data.length > 24 ? data.slice(-24) : data;
+  const chartWidth = Math.min(584, limitedData.length * (barWidth + 7) + (data.length > 24 ? 16 : 0));
+  const first = limitedData[0];
   const start = first.open > first.close ? first.high : first.low;
-  const maxPrice = Math.max(...data.map(d => d.high));
-  const minPrice = Math.min(...data.map(d => d.low));
+  const maxPrice = Math.max(...limitedData.map(d => d.high));
+  const minPrice = Math.min(...limitedData.map(d => d.low));
   const startFormatted = ((maxPrice - start) / (maxPrice - minPrice)) * 235;
   const chartHeight = 235;
   const width = chartWidth;
@@ -59,8 +60,8 @@ export function getCanvas({data = [], isPositive = false, isAnimeBackground = fa
   ctx.fillRect(0, 0, width, height);
 
   // Draw OHLC bars
-  data.forEach((d, i) => {
-    const x = i * barWidth;
+  limitedData.forEach((d, i) => {
+    const x = i * (barWidth + 7); // with margin
     const isUp = d.close >= d.open;
     const color = isUp ? upColor : downColor;
 
