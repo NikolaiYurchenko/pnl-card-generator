@@ -2,6 +2,10 @@ html {
     background: linear-gradient(180deg, rgba(180, 229, 89, 0.08) 12%, rgba(180, 229, 89, 0) 59%, rgba(180, 229, 89, 0.08) 100%),
     linear-gradient(0deg, #1B1E22, #1B1E22);
 }
+@font-face {
+    font-family: "Manrope";
+    src: url("../src/server/assets/fonts/Manrope/Manrope-SemiBold.ttf") format("truetype");
+}
 #root {
     max-width: 1280px;
     margin: 0 auto;
@@ -10,6 +14,7 @@ html {
     width: 100vw;
     height: 100vh;
     box-sizing: border-box;
+    font-family: Manrope, sans-serif;
 }
 
 .main {
@@ -121,6 +126,12 @@ html {
     justify-content: space-between;
 }
 
+.editorSelect .editor-label {
+    font-weight: bold;
+    color: grey;
+    text-align: left;
+}
+
 .editorSelect select {
     width: 150px;
     padding: 0.5rem 0;
@@ -153,6 +164,12 @@ html {
 }
 .generateButton button {
     width: 200px;
+    background: rgba(180, 229, 89, 0.3);
+}
+.generateButton button:hover {
+    background: rgba(180, 229, 89, 0.5);
+    outline: none;
+    border-color: rgba(180, 229, 89, 0.5);
 }
 
 .carousel {

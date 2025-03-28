@@ -253,7 +253,7 @@ export function PnlCard2() {
 
 
         <div className="editorSelect">
-          <label htmlFor="image-upload">Or upload a background image:</label>
+          <label className="editor-label" htmlFor="image-upload">Or upload a background image:</label>
           <input className="fileInput" id="image-upload" type="file" accept="image/*" onChange={onFileChange}/>
         </div>
         <div
