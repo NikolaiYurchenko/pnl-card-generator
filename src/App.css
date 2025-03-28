@@ -43,7 +43,7 @@ html {
     display: flex;
     position: relative;
     flex-direction: column;
-    width: 500px;
+    width: 645px;
     box-sizing: border-box;
     align-items: center;
 }
@@ -111,8 +111,7 @@ html {
 }
 
 .fixedCard {
-    width: 300px !important;
-    height: 400px !important;
+    max-width: 300px;
 }
 
 .editorSelect {
