@@ -58,9 +58,10 @@
 
 #downloadButton {
     position: absolute;
-    top: 30px;
+    top: 20px;
     right: 10px;
-    color: gray;
+    color: lightgray;
+    font-size: 12rem;
 }
 
 #downloadButton:hover {
