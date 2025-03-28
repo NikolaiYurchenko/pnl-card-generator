@@ -123,7 +123,7 @@ html {
 
 .editorSelect select {
     width: 150px;
-    padding: 0.5rem;
+    padding: 0.5rem 0;
     cursor: pointer;
 }
 
