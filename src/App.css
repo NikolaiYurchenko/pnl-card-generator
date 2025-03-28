@@ -1,9 +1,12 @@
+html {
+    background: linear-gradient(180deg, rgba(180, 229, 89, 0.08) 12%, rgba(180, 229, 89, 0) 59%, rgba(180, 229, 89, 0.08) 100%),
+    linear-gradient(0deg, #1B1E22, #1B1E22);
+}
 #root {
     max-width: 1280px;
     margin: 0 auto;
     padding: 2rem;
     text-align: center;
-    background-color: #f9f9f9;
     width: 100vw;
     height: 100vh;
     box-sizing: border-box;
@@ -14,7 +17,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    background-color: #f9f9f9;
 }
 
 .main-header {
@@ -26,22 +28,24 @@
 }
 
 .main-header .navigationItem {
-    border: 1px solid black;
-    color: black;
+    border: 1px solid gray;
+    color: white;
     padding: 0.5rem;
     border-radius: 0.5rem;
     cursor: pointer;
 }
 .main-header .navigationItem.active {
-    background-color: lightgray;
+    background: rgba(255, 255, 255, 0.6);
+    color: black;
 }
 
 #root .container {
     display: flex;
     position: relative;
     flex-direction: column;
-    width: 80%;
+    width: 500px;
     box-sizing: border-box;
+    align-items: center;
 }
 
 .container img {
@@ -49,13 +53,14 @@
 }
 
 .editor {
+    width: 100%;
     margin-bottom: 3px;
 }
 
 .editor .editor-label {
     display: block;
     font-weight: bold;
-    color: black;
+    color: grey;
     text-align: left;
 }
 
@@ -63,8 +68,15 @@
     width: 100%;
     padding: 5px;
     border-radius: 5px;
-    border: 1px solid black;
+    border: 1px solid grey;
     box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.6);
+    color: black;
+}
+
+.editor .editor-input:focus {
+    border: 1px solid white;
+    background: white;
 }
 
 #download {
@@ -76,12 +88,92 @@
     width: 100%;
 }
 
+.imagePreview {
+    display: flex;
+    width: 100%;
+    gap: 1rem;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.imagePreview img {
+   margin: 0;
+}
+
+.imagePreview a {
+    margin: 0 !important;
+    width: 120px !important;
+}
+
 .imagePreview1 {
     width: 1000px;
     height: 625px;
 }
 
-.imagePreview2 {
-    width: 300px;
-    height: 400px;
+.fixedCard {
+    width: 300px !important;
+    height: 400px !important;
+}
+
+.editorSelect {
+    width: 100%;
+    margin: 1rem 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.editorSelect select {
+    width: 150px;
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.fileInput {
+    cursor: pointer !important;
+    width: 175px;
+}
+
+.dropArea {
+    width: 100%;
+    position: relative;
+    border: 2px dashed #aaa;
+    padding: 3rem 20px;
+    text-align: center;
+    margin-top: 10px;
+    cursor: pointer;
+    color: grey;
+    box-sizing: border-box;
+}
+
+.generateButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    width: 100%;
+}
+.generateButton button {
+    width: 200px;
+}
+
+.carousel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.clearButton {
+    margin-block-start: 0;
+    margin-block-end: 0;
+    position: absolute;
+    color: gray;
+    top: 0.5rem;
+    right: 1rem;
+}
+
+.clearButton:hover {
+    color: white;
 }

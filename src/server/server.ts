@@ -10,7 +10,8 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 let browser: Browser;
 
@@ -223,13 +224,14 @@ app.post("/generate-image", async (req, res) => {
 
 app.post("/pnl-card", async (req, res) => {
     try {
-      const { name, pnlSol, pnlPercent, profitUsd, investedUsd, chartData, bgType } = req.body;
+      const { name, pnlSol, pnlPercent, profitUsd, investedUsd, chartData, bgType, customImage } = req.body;
       const formattedChartData = JSON.parse(chartData);
+      const isNotLogoBg = (customImage || bgType !== 0);
 
       const canvasData = getCanvas({
         data: formattedChartData,
         isPositive:  pnlSol > 0,
-        isAnimeBackground: bgType !== 0,
+        isAnimeBackground: isNotLogoBg,
       });
 
       const pageSize = {
@@ -254,7 +256,7 @@ app.post("/pnl-card", async (req, res) => {
       }
 
       const bgImagePath = bgType === 0 ? backgroundPaths.default : backgroundPaths.anime[bgType - 1];
-      const bgImageBase64 = fs.readFileSync(bgImagePath).toString('base64');
+      const bgImageBase64 = customImage ? customImage : `data:image/png;base64,${fs.readFileSync(bgImagePath).toString('base64')}`;
       const logoPath = path.join(__dirname, "assets", "images", "logo.png");
       const logoBase64 = fs.readFileSync(logoPath).toString('base64');
 
@@ -290,14 +292,14 @@ app.post("/pnl-card", async (req, res) => {
         }
         #capture:before {
           content: '';
-          background: url("data:image/png;base64,${bgImageBase64}");
+          background: url("${bgImageBase64}");
           position: absolute;
           top: 0;
           left: 0;
-          width: ${bgType === 0 ? 496 : 600}px;
-          height: ${bgType === 0 ? 756 : 800}px;
-          z-index: ${bgType === 0 ? 1 : -1};
-          filter: ${bgType !== 0 ? 'unset': `hue-rotate(${formatToString(pnlSol).isNegative ? 200 : 0}deg)`};
+          width: ${isNotLogoBg ? 600 : 496}px;
+          height: ${(isNotLogoBg ? 800 : 756) - (formattedChartData.length > 0 ? 0 : 200)}px;
+          z-index: ${isNotLogoBg ? -1 : 1};
+          filter: ${isNotLogoBg ? `hue-rotate(${formatToString(pnlSol).isNegative ? 200 : 0}deg)` : 'unset'};
         }
         #capture.darken {
           background: linear-gradient(180deg, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.81) 67%);
@@ -422,7 +424,7 @@ app.post("/pnl-card", async (req, res) => {
             <style>${inlineCSS}</style>
           </head>
           <body>
-            <div id="capture" class="${bgType !== 0 ? 'darken' : formatToString(pnlSol).isNegative ? 'negative' : 'positive'}">
+            <div id="capture" class="${isNotLogoBg ? 'darken' : formatToString(pnlSol).isNegative ? 'negative' : 'positive'}">
               <div class="captureContainer">
                 <p class="tokenName">${name.toUpperCase()}</p>
                 <div class="pnlContainer">

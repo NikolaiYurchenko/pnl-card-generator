@@ -1,4 +1,5 @@
 import {useState} from "react";
+import {SliderComp} from "../SliderComp";
 
 type PNL = {
   name: string;
@@ -8,7 +9,26 @@ type PNL = {
   investedUsd: number;
   chartData: string;
   bgType: number;
+  customImage: string;
   [key: string]: string | number;
+};
+
+const responsive = {
+  desktop: {
+    breakpoint: { max: 3000, min: 1024 },
+    items: 3,
+    slidesToSlide: 3 // optional, default to 1.
+  },
+  tablet: {
+    breakpoint: { max: 1024, min: 464 },
+    items: 2,
+    slidesToSlide: 2 // optional, default to 1.
+  },
+  mobile: {
+    breakpoint: { max: 464, min: 0 },
+    items: 1,
+    slidesToSlide: 1 // optional, default to 1.
+  }
 };
 
 const TEST_SHORT_DATA = [
@@ -61,7 +81,8 @@ const TEST_PNL_DATA = {
   profitUsd: -14072,
   investedUsd: 14000000.85,
   bgType: 0,
-  chartData: TEST_EMPTY_CHART_DATA
+  chartData: TEST_EMPTY_CHART_DATA,
+  customImage: '',
 };
 
 const backgrounds = [
@@ -82,8 +103,16 @@ const chartDataOptions = [
 
 export function PnlCard2() {
   const [data, setData] = useState<PNL>(TEST_PNL_DATA);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrls, setImageUrls] = useState<Array<string>>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [bgFile, setBgFile] = useState<File | null>(null);
+
+  const clearCustomBackground = () => {
+    setBgFile(null);
+    setData({ ...data, customImage: '' });
+    const inputElement = document.getElementById("image-upload") as HTMLInputElement;
+    if (inputElement) inputElement.value = '';
+  }
 
   const handleGenerateImage = async () => {
     setLoading(true);
@@ -96,7 +125,8 @@ export function PnlCard2() {
     if (response.ok) {
       const blob = await response.blob();
       const imgUrl = URL.createObjectURL(blob);
-      setImageUrl(imgUrl);
+      setImageUrls([...imageUrls, imgUrl]);
+      clearCustomBackground();
     } else {
       console.error("Failed to generate image");
     }
@@ -106,7 +136,6 @@ export function PnlCard2() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setImageUrl(null);
     setData({
       ...data,
       [name as keyof PNL]: isNaN(Number(value)) ? value : parseFloat(value),
@@ -125,10 +154,88 @@ export function PnlCard2() {
     if (selectedChartData) setData({ ...data, chartData: selectedChartData.value });
   };
 
+  const resizeImage = (file: File, width: number, height: number): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          img.src = e.target.result as string;
+        }
+      };
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = width;
+        canvas.height = height;
+
+        if (ctx) {
+          // Calculate aspect ratios
+          const imgRatio = img.width / img.height;
+          const targetRatio = width / height;
+
+          let drawWidth;
+          let drawHeight;
+          let offsetX = 0;
+          let offsetY = 0;
+
+          // Adjust dimensions to "cover"
+          if (imgRatio > targetRatio) {
+            drawHeight = height;
+            drawWidth = img.width * (height / img.height);
+            offsetX = (width - drawWidth) / 2;
+          } else {
+            drawWidth = width;
+            drawHeight = img.height * (width / img.width);
+            offsetY = (height - drawHeight) / 2;
+          }
+
+          // Draw image (cover behavior)
+          ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+          resolve(canvas.toDataURL("image/png"));
+      }};
+
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleImageUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file.");
+      return;
+    }
+
+    setBgFile(file);
+    const resizedImage = await resizeImage(file, 600, 800);
+    setData((prev) => ({ ...prev, customImage: resizedImage }));
+  };
+
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      await handleImageUpload(e.target.files[0]);
+    }
+  };
+
+  // Drag-and-drop handlers
+  const onDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (e.dataTransfer.files?.[0]) {
+      await handleImageUpload(e.dataTransfer.files[0]);
+    }
+  };
+
+  const preventDefaults = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   return (
       <div className="container">
         {Object.keys(data).map((key) => (
-            (key !== 'bgType' && key !== 'chartData') ? <div key={key} className="editor">
+            (key !== 'bgType' && key !== 'chartData' && key !== 'customImage') ? <div key={key} className="editor">
               <label className="editor-label">{key}:</label>
               <input
                   type="text"
@@ -140,19 +247,7 @@ export function PnlCard2() {
               />
             </div> : null
         ))}
-
-        <div className="editor">
-          <label className="editor-label">Background type:</label>
-          <select id="background" value={data.bgType} onChange={handleBgChange}>
-            {backgrounds.map((bg) => (
-                <option key={bg.value} value={bg.value}>
-                  {bg.label}
-                </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="editor">
+        <div className="editorSelect">
           <label className="editor-label">Chart data:</label>
           <select id="background" value={data.chartData} onChange={handleChartDataChange}>
             {chartDataOptions.map((cd) => (
@@ -163,16 +258,58 @@ export function PnlCard2() {
           </select>
         </div>
 
-        <button onClick={handleGenerateImage}>{loading ? 'Loading...' : 'Generate Image'}</button>
+        <div className="editorSelect">
+          <label className="editor-label">Background type:</label>
+          <select id="background" value={data.bgType} onChange={handleBgChange}>
+            {backgrounds.map((bg) => (
+                <option key={bg.value} value={bg.value}>
+                  {bg.label}
+                </option>
+            ))}
+          </select>
+        </div>
 
-        {imageUrl && !loading && (
-            <>
-              <a id='download' href={imageUrl} download="pnl-image.png">
-                <button>Download</button>
-              </a>
-              <img className="imagePreview2" src={imageUrl} alt={imageUrl}/>
+
+        <div className="editorSelect">
+          <label htmlFor="image-upload">Or upload a background image:</label>
+          <input className="fileInput" id="image-upload" type="file" accept="image/*" onChange={onFileChange}/>
+        </div>
+        <div
+            onDrop={onDrop}
+            onDragOver={preventDefaults}
+            onDragEnter={preventDefaults}
+            className="dropArea"
+        >
+          {bgFile?.name ? bgFile?.name : 'Drag & drop an image here'}
+          <p className="clearButton" onClick={clearCustomBackground}>Reset</p>
+        </div>
+
+        <div className="generateButton">
+          <button onClick={handleGenerateImage}>{loading ? 'Loading...' : 'Generate Image'}</button>
+        </div>
+
+        <div className="carousel">
+          {
+              imageUrls.length > 0 && imageUrls.length < 3 && <>
+                {imageUrls.map((imageUrl) => (
+                    <div key={imageUrl} className="imagePreviewSlide fixedCard">
+                      <img className="imagePreviewSlideImage fixedCard" src={imageUrl} alt={imageUrl}/>
+                      <a id='downloadButton' href={imageUrl} download="pnl-image.png">
+                        Download
+                      </a>
+                    </div>
+                ))}
             </>
-        )}
+          }
+          {imageUrls.length > 2 && (
+              <SliderComp
+                  autoplay={false}
+                  autoplaySpeed={3000}
+                  slideNum={3}
+                  data={imageUrls}
+              />
+          )}
+        </div>
       </div>
   );
 }

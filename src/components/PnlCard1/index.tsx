@@ -66,7 +66,9 @@ export function PnlCard1() {
             </div>
         ))}
 
-        <button onClick={handleGenerateImage}>{loading ? 'Loading...' : 'Generate Image'}</button>
+        <div className="generateButton">
+          <button onClick={handleGenerateImage}>{loading ? 'Loading...' : 'Generate Image'}</button>
+        </div>
 
         {imageUrl && !loading && (
             <>
