@@ -274,8 +274,8 @@ export function PnlCard2() {
           {
               imageUrls.length > 0 && imageUrls.length < 3 && <>
                 {imageUrls.map((imageUrl) => (
-                    <div key={imageUrl} className="imagePreviewSlide fixedCard">
-                      <img className="imagePreviewSlideImage fixedCard" src={imageUrl} alt={imageUrl}/>
+                    <div key={imageUrl} className="imagePreviewSlide">
+                      <img className="imagePreviewSlideImage" src={imageUrl} alt={imageUrl}/>
                       <a id='downloadButton' href={imageUrl} download="pnl-image.png">
                         Download
                       </a>
