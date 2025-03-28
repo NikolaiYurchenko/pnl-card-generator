@@ -19,7 +19,7 @@ function App() {
           ))}
         </header>
         {
-          currentTab === tabs.first.value ? <PnlCard1 /> : <PnlCard2 />
+          currentTab === tabs.first.value ? <PnlCard2 /> : <PnlCard1 />
         }
       </div>
   );
