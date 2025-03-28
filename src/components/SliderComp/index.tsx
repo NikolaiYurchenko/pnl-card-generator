@@ -2,7 +2,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FiArrowRightCircle, FiArrowLeftCircle } from "react-icons/fi";
-import { useRef } from "react";
+import { useRef} from "react";
 import {useResponsive} from "../../hooks/useResponsive.ts";
 import './index.css'
 
@@ -20,7 +20,7 @@ export const SliderComp = ({
    autoplaySpeed
  }: SliderProps) => {
   const { screenType } = useResponsive();
-  const sliderRef = useRef(null);
+  const sliderRef = useRef<Slider>(null);
   const settings = {
     dots: false,
     infinite: true,
@@ -32,6 +32,7 @@ export const SliderComp = ({
     slidesToScroll: 1,
   };
 
+  // @ts-ignore
   return (
       <>
       <div className="carouselContainer">

@@ -13,24 +13,6 @@ type PNL = {
   [key: string]: string | number;
 };
 
-const responsive = {
-  desktop: {
-    breakpoint: { max: 3000, min: 1024 },
-    items: 3,
-    slidesToSlide: 3 // optional, default to 1.
-  },
-  tablet: {
-    breakpoint: { max: 1024, min: 464 },
-    items: 2,
-    slidesToSlide: 2 // optional, default to 1.
-  },
-  mobile: {
-    breakpoint: { max: 464, min: 0 },
-    items: 1,
-    slidesToSlide: 1 // optional, default to 1.
-  }
-};
-
 const TEST_SHORT_DATA = [
   { "timestamp_secs": 1742506680, "open": 0.00000018, "high": 0.00000036, "low": 0.000000162, "close": 0.000000173, "volume": 144.52 },
   { "timestamp_secs": 1742506620, "open": 0.000000173, "high": 0.000000183, "low": 0.000000108, "close": 0.000000185, "volume": 52.71 },
