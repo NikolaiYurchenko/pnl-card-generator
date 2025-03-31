@@ -13,6 +13,12 @@ type PNL = {
   [key: string]: string | number;
 };
 
+export type CardData = {
+  imageUrl: string;
+  imageName: string;
+  chartType: string;
+}
+
 const TEST_SHORT_DATA = [
   { "timestamp_secs": 1742506680, "open": 0.00000018, "high": 0.00000036, "low": 0.000000162, "close": 0.000000173, "volume": 144.52 },
   { "timestamp_secs": 1742506620, "open": 0.000000173, "high": 0.000000183, "low": 0.000000108, "close": 0.000000185, "volume": 52.71 },
@@ -85,7 +91,7 @@ const chartDataOptions = [
 
 export function PnlCard2() {
   const [data, setData] = useState<PNL>(TEST_PNL_DATA);
-  const [imageUrls, setImageUrls] = useState<Array<string>>([]);
+  const [cardData, setCardData] = useState<Array<CardData>>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [bgFile, setBgFile] = useState<File | null>(null);
 
@@ -107,7 +113,9 @@ export function PnlCard2() {
     if (response.ok) {
       const blob = await response.blob();
       const imgUrl = URL.createObjectURL(blob);
-      setImageUrls([...imageUrls, imgUrl]);
+      const chartType = chartDataOptions.find((cd) => cd.value === data.chartData)?.label;
+      const imageName = data.customImage ? bgFile?.name : backgrounds.find((bg) => bg.value === data.bgType)?.label;
+      setCardData([...cardData, { imageUrl: imgUrl, imageName: imageName || '', chartType: chartType || '' }]);
       clearCustomBackground();
     } else {
       console.error("Failed to generate image");
@@ -272,23 +280,23 @@ export function PnlCard2() {
 
         <div className="carousel">
           {
-              imageUrls.length > 0 && imageUrls.length < 3 && <>
-                {imageUrls.map((imageUrl) => (
-                    <div key={imageUrl} className="imagePreviewSlide fixedCard">
-                      <img className="imagePreviewSlideImage fixedCard" src={imageUrl} alt={imageUrl}/>
-                      <a id='downloadButton' href={imageUrl} download="pnl-image.png">
+              cardData.length > 0 && cardData.length < 2 && <>
+                {cardData.map((cd) => (
+                    <div key={cd.imageUrl} className="imagePreviewSlide fixedCard">
+                      <img className="imagePreviewSlideImage fixedCard" src={cd.imageUrl} alt={cd.imageUrl}/>
+                      <a id='downloadButton' href={cd.imageUrl} download="pnl-image.png">
                         Download
                       </a>
                     </div>
                 ))}
             </>
           }
-          {imageUrls.length > 2 && (
+          {cardData.length > 1 && (
               <SliderComp
                   autoplay={false}
                   autoplaySpeed={3000}
-                  slideNum={3}
-                  data={imageUrls}
+                  slideNum={1}
+                  data={cardData}
               />
           )}
         </div>

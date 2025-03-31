@@ -5,9 +5,10 @@ import { FiArrowRightCircle, FiArrowLeftCircle } from "react-icons/fi";
 import { useRef} from "react";
 import {useResponsive} from "../../hooks/useResponsive.ts";
 import './index.css'
+import {CardData} from "../PnlCard2";
 
 type SliderProps = {
-  data: string[];
+  data: CardData[];
   slideNum: number;
   autoplay: boolean;
   autoplaySpeed: number;
@@ -15,7 +16,7 @@ type SliderProps = {
 
 export const SliderComp = ({
    data,
-   slideNum,
+   slideNum = 1,
    autoplay,
    autoplaySpeed
  }: SliderProps) => {
@@ -28,7 +29,7 @@ export const SliderComp = ({
     autoplay: autoplay,
     autoplaySpeed: autoplaySpeed,
     arrows: false,
-    slidesToShow: screenType === "MOBILE" ? 2 : slideNum,
+    slidesToShow: slideNum,
     slidesToScroll: 1,
   };
 
@@ -37,24 +38,33 @@ export const SliderComp = ({
       <>
       <div className="carouselContainer">
         <div className="carouselWrapper">
-          {screenType !== "MOBILE" && (
+          {screenType !== "MOBILE" && data?.length > 1 && (
               <div onClick={() => sliderRef?.current?.slickPrev()} className="prev">
             <FiArrowLeftCircle style={{ fontSize: 24 }} />
             </div>
           )}
 
           <Slider {...settings} ref={sliderRef}>
-              {data?.length > 0 &&
-              data?.map((imageUrl: string) => (
-                  <div key={imageUrl} className="imagePreviewSlide bg-image-container">
-                    <img className="imagePreviewSlideImage" src={imageUrl} alt={imageUrl}/>
-                    <a id='downloadButton' href={imageUrl} download="pnl-image.png">
-                      Download
-                    </a>
+            {data?.length > 0 &&
+              data?.map((cd, index) => (
+                  <div key={index} className="imagePreviewSlide bg-image-container">
+                    <div className="infoContainer">
+                      <p className="infoLabel">Chart data:</p><span className="infoValue">{cd.chartType}</span>
+                    </div>
+                    <div className="infoContainer">
+                      <p className="infoLabel">Bg image:</p><span className="infoValue">{cd.imageName}</span>
+                    </div>
+                    <div className="infoContainer">
+                      <p className="infoLabel"> </p>
+                      <a id='downloadButton' href={cd.imageUrl} download="pnl-image.png">
+                        Download
+                      </a>
+                    </div>
+                    <img className="imagePreviewSlideImage" src={cd.imageUrl} alt={cd.imageUrl}/>
                   </div>
               ))}
           </Slider>
-          {screenType !== "MOBILE" && (
+          {screenType !== "MOBILE" && data?.length > 1 && (
               <div onClick={() => sliderRef?.current?.slickNext()} className="next">
                 <FiArrowRightCircle style={{fontSize: 24}}/>
               </div>
