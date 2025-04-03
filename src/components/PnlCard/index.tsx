@@ -1,5 +1,5 @@
-import {useState} from "react";
-import {SliderComp} from "../SliderComp";
+import React, { useState } from "react";
+import { SliderComp } from "../SliderComp";
 
 type PNL = {
   name: string;
@@ -10,6 +10,7 @@ type PNL = {
   chartData: string;
   bgType: number;
   customImage: string;
+  relativePath: string;
   [key: string]: string | number;
 };
 
@@ -19,14 +20,23 @@ export type CardData = {
   chartType: string;
 }
 
-const TEST_SHORT_DATA = [
+type CandleData = {
+  timestamp_secs: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+};
+
+const TEST_SHORT_DATA: CandleData[] = [
   { "timestamp_secs": 1742506680, "open": 0.00000018, "high": 0.00000036, "low": 0.000000162, "close": 0.000000173, "volume": 144.52 },
   { "timestamp_secs": 1742506620, "open": 0.000000173, "high": 0.000000183, "low": 0.000000108, "close": 0.000000185, "volume": 52.71 },
   { "timestamp_secs": 1742506560, "open": 0.000000185, "high": 0.000000183, "low": 0.000000108, "close": 0.000000117, "volume": 107.18 },
   { "timestamp_secs": 1742506500, "open": 0.000000117, "high": 0.000000176, "low": 0.000000099, "close": 0.000000133, "volume": 104.96 },
   { "timestamp_secs": 1742506740, "open": 0.000000133, "high": 0.0000004, "low": 0.0000001, "close": 0.00000027, "volume": 125.44 },
 ];
-const TEST_LONG_DATA = [
+const TEST_LONG_DATA: CandleData[] = [
   { "timestamp_secs": 1742506680, "open": 0.00000018, "high": 0.00000036, "low": 0.000000162, "close": 0.000000173, "volume": 144.52 },
   { "timestamp_secs": 1742506740, "open": 0.000000209, "high": 0.000000268, "low": 0.000000156, "close": 0.000000212, "volume": 80.52 },
   { "timestamp_secs": 1742506800, "open": 0.000000212, "high": 0.000000252, "low": 0.000000153, "close": 0.000000208, "volume": 124.12 },
@@ -71,6 +81,7 @@ const TEST_PNL_DATA = {
   bgType: 0,
   chartData: TEST_EMPTY_CHART_DATA,
   customImage: '',
+  relativePath: 'pnl_cards/chau14',
 };
 
 const backgrounds = [
@@ -89,7 +100,7 @@ const chartDataOptions = [
   { label: 'Negative max', value: TEST_NEGATIVE_MAX_CHART_DATA },
 ]
 
-export function PnlCard2() {
+export function PnlCard() {
   const [data, setData] = useState<PNL>(TEST_PNL_DATA);
   const [cardData, setCardData] = useState<Array<CardData>>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -194,7 +205,8 @@ export function PnlCard2() {
 
   const handleImageUpload = async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file.");
+      console.error("Please upload an image file.");
+      clearCustomBackground();
       return;
     }
 
@@ -222,10 +234,12 @@ export function PnlCard2() {
     e.stopPropagation();
   };
 
+  const notEditableKeyByDefault = ['bgType', 'chartData', 'customImage', 'relativePath'];
+
   return (
       <div className="container">
         {Object.keys(data).map((key) => (
-            (key !== 'bgType' && key !== 'chartData' && key !== 'customImage') ? <div key={key} className="editor">
+            (!notEditableKeyByDefault.includes(key)) ? <div key={key} className="editor">
               <label className="editor-label">{key}:</label>
               <input
                   type="text"
