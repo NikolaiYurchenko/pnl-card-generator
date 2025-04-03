@@ -1,4 +1,20 @@
-import {Canvas, createCanvas} from "canvas";
+import { Canvas, createCanvas } from "canvas";
+
+const colors = {
+  positive: 'rgba(180, 229, 89, 1)',
+  neutral: 'rgba(54, 59, 67, 1)',
+  negative: 'rgba(220, 87, 91, 1)',
+  white: 'rgba(255, 255, 255, 1)',
+};
+
+const canvasConfig = {
+  barWidth: 16,
+  maxDataEntriesLength: 25,
+  maxChartWidth: 568,
+  maxChartHeight: 235,
+  barMargin: 7,
+  wicksWidth: 2,
+};
 
 type CanvasData = Array<{
   timestamp_secs: number,
@@ -9,37 +25,32 @@ type CanvasData = Array<{
   volume: number
 }>;
 
-const colors = {
-  positive: 'rgba(180, 229, 89, 1)',
-  neutral: 'rgba(54, 59, 67, 1)',
-  negative: 'rgba(220, 87, 91, 1)',
-  white: 'rgba(255, 255, 255, 1)',
-}
-
 type ChartProps = {
   data: CanvasData,
   isPositive?: boolean,
   isAnimeBackground?: boolean,
-}
+};
 
-export function getCanvas({data = [], isPositive = false, isAnimeBackground = false}: ChartProps): { data: Canvas, width: number, start: number } {
+type CanvasReturnType = { data: Canvas, width: number, start: number };
+
+export function getCanvas({data = [], isPositive = false, isAnimeBackground = false}: ChartProps): CanvasReturnType {
   if (!data.length) {
     return {
       data: createCanvas(0, 0),
       width: 0,
-      start: 117,
+      start: Math.floor(canvasConfig.maxChartHeight/2),
     }
   }
 
-  const barWidth = 16;
-  const limitedData = data.length > 25 ? data.slice(-25) : data;
-  const chartWidth = Math.min(568, limitedData.length * (barWidth + 7) - 7);
+  const barWidth = canvasConfig.barWidth;
+  const limitedData = data.length > canvasConfig.maxDataEntriesLength ? data.slice(-canvasConfig.maxDataEntriesLength) : data;
+  const chartWidth = Math.min(canvasConfig.maxChartWidth, limitedData.length * (barWidth + canvasConfig.barMargin) - canvasConfig.barMargin);
   const first = limitedData[0];
   const start = first.open > first.close ? first.high : first.low;
   const maxPrice = Math.max(...limitedData.map(d => d.high));
   const minPrice = Math.min(...limitedData.map(d => d.low));
-  const startFormatted = ((maxPrice - start) / (maxPrice - minPrice)) * 235;
-  const chartHeight = 235;
+  const startFormatted = ((maxPrice - start) / (maxPrice - minPrice)) * canvasConfig.maxChartHeight;
+  const chartHeight = canvasConfig.maxChartHeight;
   const width = chartWidth;
   const height = chartHeight;
 
@@ -61,13 +72,13 @@ export function getCanvas({data = [], isPositive = false, isAnimeBackground = fa
 
   // Draw OHLC bars
   limitedData.forEach((d, i) => {
-    const x = i * (barWidth + 7); // with margin
+    const x = i * (barWidth + canvasConfig.barMargin);
     const isUp = d.close >= d.open;
     const color = isUp ? upColor : downColor;
 
     ctx.fillStyle = color;
     ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = canvasConfig.wicksWidth;
 
     // Draw OHLC bar
     const openY = yScale(d.open);

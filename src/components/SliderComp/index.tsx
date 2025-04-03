@@ -5,7 +5,7 @@ import { FiArrowRightCircle, FiArrowLeftCircle } from "react-icons/fi";
 import { useRef} from "react";
 import {useResponsive} from "../../hooks/useResponsive.ts";
 import './index.css'
-import {CardData} from "../PnlCard2";
+import {CardData} from "../PnlCard";
 
 type SliderProps = {
   data: CardData[];
